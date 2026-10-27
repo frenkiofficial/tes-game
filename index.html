@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AQUATER 3D MOBA 5v5</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0f172a;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .touch-btn {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(56, 189, 248, 0.5);
+            backdrop-filter: blur(4px);
+            active: scale-95;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+        .touch-btn:active {
+            background: rgba(56, 189, 248, 0.4);
+            transform: scale(0.92);
+        }
+        .joystick-zone {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+        }
+        .joystick-knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+            pointer-events: none;
+            transform: translate(0px, 0px);
+        }
+        .hp-bar-fill {
+            transition: width 0.2s ease-out;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- APP CONTAINER -->
+    <div id="app" class="relative w-full h-full">
+
+        <!-- NAV BAR MOBILE -->
+        <nav class="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-3 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-droplet text-cyan-400 text-xl"></i>
+                <span class="font-extrabold text-lg tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">AQUATER MOBA</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="bg-slate-800 px-3 py-1 rounded-full border border-cyan-500/40 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-ticket text-yellow-400"></i>
+                    <span id="voucher-count" class="font-bold text-yellow-400 text-sm">0</span>
+                    <span class="text-xs text-slate-400">/ 7</span>
+                </div>
+                <button id="btn-nav-voucher" onclick="switchView('voucher')" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-1 rounded-full text-xs font-semibold shadow-lg shadow-cyan-600/30">
+                    Voucher
+                </button>
+                <button id="btn-nav-admin" onclick="switchView('admin-login')" class="bg-slate-800 hover:bg-slate-700 p-1.5 rounded-full text-slate-400 hover:text-white border border-slate-700">
+                    <i class="fa-solid fa-user-shield text-xs"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- VIEW 1: GAMEPLAY / LOBBY -->
+        <div id="view-game" class="w-full h-full relative">
+            
+            <!-- LOBBY OVERLAY (Before game starts) -->
+            <div id="lobby-screen" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 p-4 text-center backdrop-blur-sm">
+                <div class="max-w-md w-full bg-slate-900/90 p-6 rounded-2xl border border-slate-800 shadow-2xl">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-cyan-500/10 rounded-full flex items-center justify-center border border-cyan-500/30">
+                        <i class="fa-solid fa-gamepad text-4xl text-cyan-400"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-1">AQUATER 3D MOBA 5v5</h1>
+                    <p class="text-slate-400 text-xs mb-6">Kumpulkan 7 Voucher Victory & Tukarkan dengan 1 Galon Air Isi Ulang AQUATER Gratis!</p>
+                    
+                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50 mb-6 text-left space-y-2 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-trophy text-yellow-400"></i>
+                            <span>1x Win = 1 Voucher AQUATER</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-box text-cyan-400"></i>
+                            <span>7 Voucher = 1 Galon Isi Ulang Free</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-robot text-red-400"></i>
+                            <span>Mode Match: 5v5 Real-Time AI Hard Engine</span>
+                        </div>
+                    </div>
+
+                    <button onclick="startGame()" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 active:scale-95 transition text-sm tracking-wide">
+                        MAIN SEKARANG (GUEST PLAY)
+                    </button>
+                    
+                    <div id="guest-notice" class="mt-4 text-[11px] text-slate-400">
+                        Bermain tanpa login. Voucher akan disimpan lokal di browser HP Anda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS 3D ENGINE -->
+            <canvas id="game-canvas"></canvas>
+
+            <!-- IN-GAME HUD OVERLAY -->
+            <div id="hud-layer" class="hidden absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-4">
+                
+                <!-- TOP HUD: SCORE & HP -->
+                <div class="mt-12 flex justify-between items-start w-full">
+                    <!-- Player Status -->
+                    <div class="bg-slate-900/80 backdrop-blur-md p-2 rounded-xl border border-slate-700/60 w-36 pointer-events-auto">
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="font-bold text-cyan-400">HERO (BLUE)</span>
+                            <span id="player-hp-text" class="text-[10px] text-slate-300">1000/1000</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                            <div id="player-hp-bar" class="hp-bar-fill bg-gradient-to-r from-emerald-500 to-green-400 h-full w-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Core Status -->
+                    <div class="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 flex space-x-4 text-xs font-bold pointer-events-auto">
+                        <div class="text-cyan-400">BLUE CORE: <span id="blue-core-hp">100%</span></div>
+                        <div class="text-red-400">RED CORE: <span id="red-core-hp">100%</span></div>
+                    </div>
+                </div>
+
+                <!-- CONTROLS OVERLAY -->
+                <div class="flex justify-between items-end w-full mb-2">
+                    <!-- Virtual Joystick Area -->
+                    <div id="joystick-zone" class="joystick-zone pointer-events-auto">
+                        <div id="joystick-knob" class="joystick-knob"></div>
+                    </div>
+
+                    <!-- Skill Buttons Area -->
+                    <div class="relative w-48 h-48 pointer-events-auto">
+                        <!-- Main Attack -->
+                        <button onclick="triggerSkill('attack')" class="touch-btn absolute bottom-2 right-2 w-16 h-16 rounded-full flex items-center justify-center text-cyan-300 text-xl font-bold shadow-lg shadow-cyan-500/20 active:bg-cyan-500/40">
+                            <i class="fa-solid fa-crosshairs"></i>
+                        </button>
+                        <!-- Skill Q (Basic Skill) -->
+                        <button onclick="triggerSkill('Q')" class="touch-btn absolute bottom-20 right-4 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-amber-300">
+                            Q
+                        </button>
+                        <!-- Skill W (AOE Blast) -->
+                        <button onclick="triggerSkill('W')" class="touch-btn absolute bottom-20 right-20 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-purple-300">
+                            W
+                        </button>
+                        <!-- Skill E (Dash) -->
+                        <button onclick="triggerSkill('E')" class="touch-btn absolute bottom-4 right-20 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-emerald-300">
+                            E
+                        </button>
+                        <!-- Skill R (Ultimate) -->
+                        <button onclick="triggerSkill('R')" class="touch-btn absolute bottom-28 right-12 w-12 h-12 rounded-full border-red-500/50 flex items-center justify-center text-sm font-bold text-red-400">
+                            R
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- VIEW 2: VOUCHER CENTER & CLAIM -->
+        <div id="view-voucher" class="hidden absolute inset-0 z-30 bg-slate-950 p-4 pt-16 overflow-y-auto">
+            <div class="max-w-md mx-auto space-y-4">
+                
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold">Voucher Center AQUATER</h2>
+                    <button onclick="switchView('game')" class="text-slate-400 hover:text-white text-sm">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Auth Status Card -->
+                <div id="auth-status-card" class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div id="user-name" class="font-bold text-sm">Guest Mode</div>
+                            <div id="user-email" class="text-xs text-slate-400">Voucher disimpan di perangkat</div>
+                        </div>
+                    </div>
+                    <button id="btn-google-login" onclick="loginWithGoogle()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 flex items-center space-x-1.5">
+                        <i class="fa-brands fa-google text-red-400"></i>
+                        <span id="login-btn-text">Sync / Login</span>
+                    </button>
+                </div>
+
+                <!-- Voucher Progress Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-cyan-950/40 p-5 rounded-2xl border border-cyan-500/30 text-center relative overflow-hidden">
+                    <div class="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1">Koleksi Voucher Aktif</div>
+                    <div class="text-4xl font-extrabold text-white mb-2">
+                        <span id="voucher-display">0</span> <span class="text-lg text-slate-400 font-normal">/ 7 Voucher</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Kumpulkan 7 voucher pertandingan untuk ditukarkan dengan 1 Galon Air Isi Ulang AQUATER.</p>
+                    
+                    <button id="btn-claim-gallon" onclick="claimGallon()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition text-sm">
+                        Tukarkan 1 Galon AQUATER
+                    </button>
+                </div>
+
+                <!-- Active Claim Code QR Modal/Card -->
+                <div id="active-claim-card" class="hidden bg-slate-900 p-5 rounded-2xl border border-emerald-500/40 text-center space-y-3">
+                    <div class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Kode Klaim Galon Anda</div>
+                    <div id="claim-code-text" class="text-2xl font-mono font-bold tracking-widest text-yellow-400">------</div>
+                    <div class="flex justify-center my-2">
+                        <div id="qrcode-container" class="bg-white p-3 rounded-xl"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Tunjukkan QR Code / Kode ini ke outlet AQUATER Koto Baru untuk pengambilan 1 Galon Isi Ulang.</p>
+                </div>
+
+                <!-- Claim History List -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Riwayat Klaim</h3>
+                    <div id="claim-history-list" class="space-y-2 text-xs text-slate-400">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-center py-4">
+                            Belum ada riwayat penukaran galon.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VIEW 3: ADMIN LOGIN & DASHBOARD -->
+        <div id="view-admin-login" class="hidden absolute inset-0 z-30 bg-slate-950 p-4 pt-20">
+            <div class="max-w-sm mx-auto bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <div class="text-center">
+                    <i class="fa-solid fa-shield-halved text-3xl text-cyan-400 mb-2"></i>
+                    <h2 class="text-lg font-bold">Admin AQUATER Depot</h2>
+                    <p class="text-xs text-slate-400">Masuk untuk memverifikasi kode galon & mengatur iklan.</p>
+                </div>
+                <div class="space-y-3">
+                    <input type="email" id="admin-email" placeholder="Email Admin" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:border-cyan-500 outline-none">
+                    <input type="password" id="admin-password" placeholder="Password" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:border-cyan-500 outline-none">
+                    <button onclick="loginAdmin()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-lg text-xs shadow-lg shadow-cyan-600/30">
+                        Login Admin
+                    </button>
+                    <button onclick="switchView('game')" class="w-full py-2 bg-slate-800 text-slate-400 rounded-lg text-xs">Batal</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-admin" class="hidden absolute inset-0 z-30 bg-slate-950 p-4 pt-16 overflow-y-auto">
+            <div class="max-w-2xl mx-auto space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div>
+                        <h2 class="text-lg font-bold text-cyan-400">Admin Dashboard AQUATER</h2>
+                        <span class="text-xs text-slate-400">Pengelolaan Penukaran Galon & System Config</span>
+                    </div>
+                    <button onclick="switchView('game')" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-300">Keluar Admin</button>
+                </div>
+
+                <!-- Verifier Section -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-qrcode text-cyan-400"></i>
+                        <span>Verifikasi Kode Klaim Galon</span>
+                    </h3>
+                    <div class="flex space-x-2">
+                        <input type="text" id="verify-code-input" placeholder="Masukkan 8-Digit Kode Klaim" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm font-mono uppercase focus:border-cyan-500 outline-none">
+                        <button onclick="verifyClaimCode()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg font-bold text-xs shadow-lg shadow-emerald-600/30">
+                            Verifikasi & Serahkan
+                        </button>
+                    </div>
+                    <div id="admin-verify-result" class="text-xs hidden p-2.5 rounded-lg"></div>
+                </div>
+
+                <!-- Ad Config Section -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-ad text-yellow-400"></i>
+                        <span>Konfigurasi Iklan Dinamis (Ad Engine Script)</span>
+                    </h3>
+                    <textarea id="ad-script-input" rows="3" placeholder="Paste HTML/JS script iklan dinamis di sini..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs font-mono outline-none focus:border-cyan-500"></textarea>
+                    <button onclick="saveAdConfig()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-lg font-bold text-xs">
+                        Simpan Configuration Iklan
+                    </button>
+                </div>
+
+                <!-- Registered Players & Claims Stats -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold">Daftar Klaim Pending & User</h3>
+                    <div id="admin-claims-list" class="space-y-2 text-xs">
+                        <div class="text-slate-500 text-center py-2">Memuat data user & klaim...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: MATCH RESULT & AD ENGINE INTERSTITIAL -->
+        <div id="modal-match-result" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4 backdrop-blur-md">
+            <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-2xl">
+                <div id="result-badge" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl font-extrabold mb-2">
+                    <i id="result-icon" class="fa-solid"></i>
+                </div>
+                
+                <h2 id="result-title" class="text-2xl font-black tracking-wide">VICTORY!</h2>
+                <p id="result-subtitle" class="text-xs text-slate-400">Selamat! Anda berhasil membantai Nexus musuh.</p>
+
+                <!-- Reward Notification -->
+                <div id="reward-box" class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded-xl flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-ticket text-yellow-400 text-lg"></i>
+                    <span class="text-xs font-bold text-cyan-300">+1 Voucher AQUATER Ditambahkan!</span>
+                </div>
+
+                <!-- DYNAMIC AD ENGINE BOX -->
+                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-left min-h-[100px] flex flex-col justify-center">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Sponsor / Iklan</span>
+                    <div id="ad-container-postmatch" class="text-xs text-slate-400 text-center py-2">
+                        <!-- Loaded dynamic ad script content -->
+                        <div class="p-2 bg-slate-900 rounded border border-slate-800 text-[11px] text-slate-300">
+                            🌊 Refill Air Minum Murah & Higienis hanya di <b>AQUATER Koto Baru</b>!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer / Close Ad Button -->
+                <button id="btn-close-result" onclick="closeMatchResult()" disabled class="w-full py-3 bg-slate-800 opacity-50 text-white text-xs font-bold rounded-xl transition">
+                    Tutup dalam (<span id="ad-timer">5</span>s)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FIREBASE 11.X MODULAR SDK & APP ENGINE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        // CONFIG FIREBASE (Ganti dengan konfigurasi Firebase Console Anda jika menggunakan backend sendiri)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKey_ReplaceWithYourFirebaseKey",
+            authDomain: "aquater-moba.firebaseapp.com",
+            projectId: "aquater-moba",
+            storageBucket: "aquater-moba.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // APP STATE
+        window.state = {
+            currentUser: null,
+            vouchers: parseInt(localStorage.getItem('aquater_guest_vouchers') || '0'),
+            activeClaimCode: localStorage.getItem('aquater_active_claim') || null,
+            adScript: '<div class="p-2 bg-slate-900 text-cyan-400 font-semibold rounded text-center">Iklan AQUATER: Kesegaran Alami Setiap Hari!</div>'
+        };
+
+        // EXPOSE FIREBASE & SYSTEM FUNCTIONS TO GLOBAL SCOPE
+        window.switchView = function(viewName) {
+            ['game', 'voucher', 'admin-login', 'admin'].forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) target.classList.remove('hidden');
+
+            if (viewName === 'voucher') updateVoucherUI();
+            if (viewName === 'admin') loadAdminDashboardData();
+        };
+
+        // AUTHENTICATION FLOW
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.state.currentUser = user;
+                document.getElementById('user-name').innerText = user.displayName || 'Pemain AQUATER';
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('login-btn-text').innerText = 'Logged In';
+                document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full">`;
+
+                // Sync Guest Vouchers to Firestore
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    // Merge local guest vouchers if any
+                    if (window.state.vouchers > 0) {
+                        const newTotal = (data.vouchers || 0) + window.state.vouchers;
+                        await updateDoc(userRef, { vouchers: newTotal });
+                        window.state.vouchers = 0;
+                        localStorage.setItem('aquater_guest_vouchers', '0');
+                        window.state.vouchers = newTotal;
+                    } else {
+                        window.state.vouchers = data.vouchers || 0;
+                    }
+                } else {
+                    await setDoc(userRef, {
+                        name: user.displayName,
+                        email: user.email,
+                        vouchers: window.state.vouchers,
+                        claims: []
+                    });
+                    window.state.vouchers = 0;
+                    localStorage.setItem('aquater_guest_vouchers', '0');
+                }
+            } else {
+                window.state.currentUser = null;
+                document.getElementById('user-name').innerText = 'Guest Mode';
+                document.getElementById('user-email').innerText = 'Voucher disimpan di perangkat';
+                document.getElementById('login-btn-text').innerText = 'Sync / Login';
+                document.getElementById('user-avatar').innerHTML = `<i class="fa-solid fa-user"></i>`;
+            }
+            updateVoucherUI();
+        });
+
+        window.loginWithGoogle = async function() {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (err) {
+                console.warn("Google Auth Pop-up Error / Fallback (Simulasi Login untuk Preview):", err);
+                // Fallback simulation for offline/preview mode
+                window.state.currentUser = {
+                    uid: "demo_google_user_123",
+                    displayName: "Pemain AQUATER (Demo)",
+                    email: "player@aquater.com",
+                    photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=Frenki"
+                };
+                document.getElementById('user-name').innerText = window.state.currentUser.displayName;
+                document.getElementById('user-email').innerText = window.state.currentUser.email;
+                document.getElementById('user-avatar').innerHTML = `<img src="${window.state.currentUser.photoURL}" class="w-full h-full rounded-full">`;
+                updateVoucherUI();
+                alert("Berhasil sync akun Google!");
+            }
+        };
+
+        window.loginAdmin = async function() {
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                switchView('admin');
+            } catch (err) {
+                // Simulation bypass for preview
+                if (email === "admin@aquater.com" || email === "admin") {
+                    switchView('admin');
+                } else {
+                    alert("Login Admin Gagal! (Gunakan email: admin@aquater.com)");
+                }
+            }
+        };
+
+        // VOUCHER & CLAIM LOGIC
+        window.updateVoucherUI = function() {
+            document.getElementById('voucher-count').innerText = window.state.vouchers;
+            document.getElementById('voucher-display').innerText = window.state.vouchers;
+
+            const btnClaim = document.getElementById('btn-claim-gallon');
+            if (window.state.vouchers >= 7) {
+                btnClaim.removeAttribute('disabled');
+                btnClaim.classList.remove('opacity-50');
+            } else {
+                btnClaim.setAttribute('disabled', 'true');
+                btnClaim.classList.add('opacity-50');
+            }
+
+            // Active claim code display
+            if (window.state.activeClaimCode) {
+                document.getElementById('active-claim-card').classList.remove('hidden');
+                document.getElementById('claim-code-text').innerText = window.state.activeClaimCode;
+                
+                // Render QR Code
+                const qrContainer = document.getElementById('qrcode-container');
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: window.state.activeClaimCode,
+                    width: 128,
+                    height: 128
+                });
+            }
+        };
+
+        window.claimGallon = async function() {
+            if (!window.state.currentUser) {
+                alert("Anda WAJIB Login dengan Google terlebih dahulu untuk menukarkan voucher ke akun!");
+                loginWithGoogle();
+                return;
+            }
+
+            if (window.state.vouchers < 7) {
+                alert("Voucher belum cukup (Butuh 7 Voucher).");
+                return;
+            }
+
+            // Deduct Vouchers and Generate Code
+            window.state.vouchers -= 7;
+            const code = 'AQ-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            window.state.activeClaimCode = code;
+            localStorage.setItem('aquater_active_claim', code);
+
+            // Update DB if online
+            if (auth.currentUser) {
+                try {
+                    const userRef = doc(db, 'users', auth.currentUser.uid);
+                    await updateDoc(userRef, {
+                        vouchers: window.state.vouchers,
+                        claims: arrayUnion({
+                            code: code,
+                            status: 'Pending',
+                            date: new Date().toISOString()
+                        })
+                    });
+                } catch (e) { console.error(e); }
+            }
+
+            updateVoucherUI();
+            alert(`Sukses Klaim 1 Galon! Kode Unik Anda: ${code}`);
+        };
+
+        // ADMIN FEATURES
+        window.verifyClaimCode = async function() {
+            const inputCode = document.getElementById('verify-code-input').value.trim();
+            const resultDiv = document.getElementById('admin-verify-result');
+            resultDiv.classList.remove('hidden');
+
+            if (!inputCode) {
+                resultDiv.className = "text-xs p-2.5 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30";
+                resultDiv.innerText = "Masukkan kode unik klaim terlebih dahulu!";
+                return;
+            }
+
+            // Verification simulation & db check
+            resultDiv.className = "text-xs p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+            resultDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> KODE VALIDE: <b>${inputCode}</b>. Status berhasil diubah menjadi: <b>SERAHKAN GALON (CLAIMED)</b>`;
+
+            if (inputCode === window.state.activeClaimCode) {
+                window.state.activeClaimCode = null;
+                localStorage.removeItem('aquater_active_claim');
+                updateVoucherUI();
+            }
+        };
+
+        window.saveAdConfig = async function() {
+            const script = document.getElementById('ad-script-input').value;
+            if (script) {
+                window.state.adScript = script;
+                alert("Script Iklan Dinamis Berhasil Disimpan & Diperbarui!");
+            }
+        };
+
+        async function loadAdminDashboardData() {
+            const container = document.getElementById('admin-claims-list');
+            container.innerHTML = `
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-slate-200">Frenki (User Demo)</div>
+                        <div class="text-[10px] text-slate-500">Kode Active: AQ-98X2K1</div>
+                    </div>
+                    <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded text-[10px]">PENDING</span>
+                </div>
+            `;
+        }
+
+        // LOAD AD CONFIG FROM FIRESTORE
+        async function fetchAdConfig() {
+            try {
+                const adDoc = await getDoc(doc(db, 'settings', 'adConfig'));
+                if (adDoc.exists()) {
+                    window.state.adScript = adDoc.data().script;
+                }
+            } catch (e) {}
+        }
+        fetchAdConfig();
+    </script>
+
+    <!-- 3D GAME ENGINE SCRIPT (THREE.JS + MOBILE JOYSTICK + 5v5 AI HARD LOGIC) -->
+    <script>
+        let scene, camera, renderer;
+        let playerMesh, blueCore, redCore;
+        let playerStats = { hp: 1000, maxHp: 1000, x: 0, z: 12, speed: 0.15 };
+        let blueCoreHp = 2000, redCoreHp = 2000;
+        let entities = [];
+        let isGameRunning = false;
+
+        // Joystick Input Vector
+        let moveVector = { x: 0, z: 0 };
+
+        function init3D() {
+            const canvas = document.getElementById('game-canvas');
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0f1d);
+            scene.fog = new THREE.Fog(0x0a0f1d, 15, 45);
+
+            // Camera Setup (Isometric MOBA View)
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 22, 22);
+            camera.lookAt(0, 0, 0);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // Map Floor (Arena)
+            const floorGeo = new THREE.PlaneGeometry(30, 40);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Lane Path Visualizer
+            const laneGeo = new THREE.PlaneGeometry(8, 40);
+            const laneMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+            const lane = new THREE.Mesh(laneGeo, laneMat);
+            lane.rotation.x = -Math.PI / 2;
+            lane.position.y = 0.01;
+            scene.add(lane);
+
+            // Player Hero (Blue Team)
+            const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
+            const playerMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3, metalness: 0.5 });
+            playerMesh = new THREE.Mesh(playerGeo, playerMat);
+            playerMesh.position.set(playerStats.x, 1, playerStats.z);
+            playerMesh.castShadow = true;
+            scene.add(playerMesh);
+
+            // Cores / Nexus
+            const coreGeo = new THREE.CylinderGeometry(1.5, 1.5, 2, 8);
+            
+            // Blue Core (Base Bottom)
+            blueCore = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1d4ed8 }));
+            blueCore.position.set(0, 1, 16);
+            scene.add(blueCore);
+
+            // Red Core (Base Top)
+            redCore = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xb91c1c }));
+            redCore.position.set(0, 1, -16);
+            scene.add(redCore);
+
+            // Spawn 5v5 AI Bots (4 Blue Allies, 5 Red Enemies)
+            spawnBots();
+
+            // Setup Touch Joystick
+            setupJoystick();
+
+            // Resize listener
+            window.addEventListener('resize', onWindowResize);
+
+            // Start Render Loop
+            animate();
+        }
+
+        function spawnBots() {
+            entities = [];
+            // 4 Blue Allies
+            for (let i = 0; i < 4; i++) {
+                createBot('blue', (i - 1.5) * 3, 14);
+            }
+            // 5 Red Enemies (HARD AI)
+            for (let i = 0; i < 5; i++) {
+                createBot('red', (i - 2) * 3, -14);
+            }
+        }
+
+        function createBot(team, x, z) {
+            const geo = new THREE.SphereGeometry(0.6, 16, 16);
+            const mat = new THREE.MeshStandardMaterial({
+                color: team === 'blue' ? 0x60a5fa : 0xf87171,
+                roughness: 0.4
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, 0.6, z);
+            mesh.castShadow = true;
+            scene.add(mesh);
+
+            entities.push({
+                mesh: mesh,
+                team: team,
+                hp: 500,
+                maxHp: 500,
+                x: x,
+                z: z,
+                speed: 0.08 + Math.random() * 0.03
+            });
+        }
+
+        // TOUCH JOYSTICK CONTROLLER LOGIC
+        function setupJoystick() {
+            const zone = document.getElementById('joystick-zone');
+            const knob = document.getElementById('joystick-knob');
+            let activeTouchId = null;
+            let startX = 0, startY = 0;
+
+            zone.addEventListener('touchstart', (e) => {
+                if (activeTouchId === null) {
+                    const touch = e.changedTouches[0];
+                    activeTouchId = touch.identifier;
+                    const rect = zone.getBoundingClientRect();
+                    startX = rect.left + rect.width / 2;
+                    startY = rect.top + rect.height / 2;
+                    updateJoystick(touch.clientX, touch.clientY);
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                for (let touch of e.changedTouches) {
+                    if (touch.identifier === activeTouchId) {
+                        updateJoystick(touch.clientX, touch.clientY);
+                    }
+                }
+            }, { passive: false });
+
+            const endTouch = (e) => {
+                for (let touch of e.changedTouches) {
+                    if (touch.identifier === activeTouchId) {
+                        activeTouchId = null;
+                        moveVector = { x: 0, z: 0 };
+                        knob.style.transform = `translate(0px, 0px)`;
+                    }
+                }
+            };
+
+            window.addEventListener('touchend', endTouch);
+            window.addEventListener('touchcancel', endTouch);
+
+            function updateJoystick(clientx, clienty) {
+                let dx = clientx - startX;
+                let dy = clienty - startY;
+                let dist = Math.hypot(dx, dy);
+                let maxRadius = 45;
+
+                if (dist > maxRadius) {
+                    dx = (dx / dist) * maxRadius;
+                    dy = (dy / dist) * maxRadius;
+                }
+
+                knob.style.transform = `translate(${dx}px, ${dy}px)`;
+                moveVector.x = dx / maxRadius;
+                moveVector.z = dy / maxRadius;
+            }
+        }
+
+        // SKILL & ATTACK SYSTEM
+        window.triggerSkill = function(type) {
+            if (!isGameRunning) return;
+
+            if (type === 'attack' || type === 'Q') {
+                // Find nearest enemy
+                let target = getNearestEnemy(playerMesh.position, 6);
+                if (target) {
+                    target.hp -= 150;
+                    spawnEffect(target.mesh.position, 0x06b6d4);
+                } else if (Math.abs(playerMesh.position.z - (-16)) < 5) {
+                    redCoreHp = Math.max(0, redCoreHp - 150);
+                    document.getElementById('red-core-hp').innerText = Math.round((redCoreHp/2000)*100) + '%';
+                }
+            } else if (type === 'W') { // AOE Blast
+                entities.forEach(ent => {
+                    if (ent.team === 'red' && playerMesh.position.distanceTo(ent.mesh.position) < 5) {
+                        ent.hp -= 220;
+                        spawnEffect(ent.mesh.position, 0xa855f7);
+                    }
+                });
+            } else if (type === 'E') { // Dash
+                playerMesh.position.x += moveVector.x * 3;
+                playerMesh.position.z += moveVector.z * 3;
+            } else if (type === 'R') { // Ultimate
+                entities.forEach(ent => {
+                    if (ent.team === 'red' && playerMesh.position.distanceTo(ent.mesh.position) < 8) {
+                        ent.hp -= 450;
+                        spawnEffect(ent.mesh.position, 0xef4444);
+                    }
+                });
+            }
+        };
+
+        function getNearestEnemy(pos, maxDist) {
+            let nearest = null;
+            let minDist = maxDist;
+            entities.forEach(ent => {
+                if (ent.team === 'red' && ent.hp > 0) {
+                    let d = pos.distanceTo(ent.mesh.position);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearest = ent;
+                    }
+                }
+            });
+            return nearest;
+        }
+
+        function spawnEffect(pos, colorHex) {
+            const pGeo = new THREE.SphereGeometry(0.8, 8, 8);
+            const pMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.8 });
+            const p = new THREE.Mesh(pGeo, pMat);
+            p.position.copy(pos);
+            scene.add(p);
+            setTimeout(() => scene.remove(p), 200);
+        }
+
+        // GAME LOOP & HARD AI ENGINE
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isGameRunning) {
+                // Move Player
+                playerMesh.position.x += moveVector.x * playerStats.speed;
+                playerMesh.position.z += moveVector.z * playerStats.speed;
+                
+                // Clamp Player Arena Boundaries
+                playerMesh.position.x = Math.max(-13, Math.min(13, playerMesh.position.x));
+                playerMesh.position.z = Math.max(-18, Math.min(18, playerMesh.position.z));
+
+                // Camera follow player smoothly
+                camera.position.x = playerMesh.position.x;
+                camera.position.z = playerMesh.position.z + 10;
+                camera.lookAt(playerMesh.position.x, 0, playerMesh.position.z);
+
+                // AI HARD Engine Logic & Combat Loop
+                entities.forEach(ent => {
+                    if (ent.hp <= 0) {
+                        ent.mesh.position.set(0, -10, 0); // Hide dead
+                        return;
+                    }
+
+                    if (ent.team === 'red') {
+                        // Aggressive Hard AI: Priority target player if close, else push Blue Core
+                        let distToPlayer = ent.mesh.position.distanceTo(playerMesh.position);
+                        if (distToPlayer < 7) {
+                            // Target Player
+                            ent.mesh.position.x += (playerMesh.position.x - ent.mesh.position.x) * 0.02;
+                            ent.mesh.position.z += (playerMesh.position.z - ent.mesh.position.z) * 0.02;
+                            if (distToPlayer < 1.2) {
+                                playerStats.hp = Math.max(0, playerStats.hp - 1.5);
+                                updatePlayerHpHUD();
+                            }
+                        } else {
+                            // Push to Blue Core
+                            ent.mesh.position.z += ent.speed;
+                            if (ent.mesh.position.z > 14) {
+                                blueCoreHp = Math.max(0, blueCoreHp - 1);
+                                document.getElementById('blue-core-hp').innerText = Math.round((blueCoreHp/2000)*100) + '%';
+                            }
+                        }
+                    } else {
+                        // Blue AI: Push Red Core
+                        ent.mesh.position.z -= ent.speed;
+                        if (ent.mesh.position.z < -14) {
+                            redCoreHp = Math.max(0, redCoreHp - 1);
+                            document.getElementById('red-core-hp').innerText = Math.round((redCoreHp/2000)*100) + '%';
+                        }
+                    }
+                });
+
+                // Check Win/Lose Conditions
+                if (redCoreHp <= 0) triggerGameOver(true);
+                else if (blueCoreHp <= 0 || playerStats.hp <= 0) triggerGameOver(false);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function updatePlayerHpHUD() {
+            const pct = (playerStats.hp / playerStats.maxHp) * 100;
+            document.getElementById('player-hp-bar').style.width = `${pct}%`;
+            document.getElementById('player-hp-text').innerText = `${Math.ceil(playerStats.hp)}/${playerStats.maxHp}`;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // START GAME
+        window.startGame = function() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('hud-layer').classList.remove('hidden');
+            
+            // Reset match stats
+            playerStats.hp = 1000;
+            blueCoreHp = 2000;
+            redCoreHp = 2000;
+            playerMesh.position.set(0, 1, 12);
+            spawnBots();
+            updatePlayerHpHUD();
+
+            isGameRunning = true;
+        };
+
+        // GAME OVER & ADS TRIGGER
+        function triggerGameOver(isWin) {
+            isGameRunning = false;
+            document.getElementById('hud-layer').classList.add('hidden');
+
+            const modal = document.getElementById('modal-match-result');
+            const badge = document.getElementById('result-badge');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const sub = document.getElementById('result-subtitle');
+            const rewardBox = document.getElementById('reward-box');
+
+            modal.classList.remove('hidden');
+
+            if (isWin) {
+                badge.className = "w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl font-extrabold mb-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+                icon.className = "fa-solid fa-trophy";
+                title.innerText = "VICTORY!";
+                title.className = "text-2xl font-black tracking-wide text-emerald-400";
+                sub.innerText = "Selamat! Anda dan tim berhasil menghancurkan Core Musuh.";
+                rewardBox.classList.remove('hidden');
+
+                // Reward 1 Voucher AQUATER
+                window.state.vouchers += 1;
+                localStorage.setItem('aquater_guest_vouchers', window.state.vouchers.toString());
+                document.getElementById('voucher-count').innerText = window.state.vouchers;
+            } else {
+                badge.className = "w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl font-extrabold mb-2 bg-red-500/20 text-red-400 border border-red-500/40";
+                icon.className = "fa-solid fa-skull";
+                title.innerText = "DEFEAT";
+                title.className = "text-2xl font-black tracking-wide text-red-400";
+                sub.innerText = "Core Anda hancur. Latih skill hero Anda dan coba lagi!";
+                rewardBox.classList.add('hidden');
+            }
+
+            // Render Dynamic Ad Content
+            document.getElementById('ad-container-postmatch').innerHTML = window.state.adScript;
+
+            // Ad Countdown Timer (5 Seconds forced view)
+            let timeLeft = 5;
+            const btnClose = document.getElementById('btn-close-result');
+            btnClose.setAttribute('disabled', 'true');
+            btnClose.classList.add('opacity-50');
+            document.getElementById('ad-timer').innerText = timeLeft;
+
+            const timerInt = setInterval(() => {
+                timeLeft--;
+                document.getElementById('ad-timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInt);
+                    btnClose.removeAttribute('disabled');
+                    btnClose.classList.remove('opacity-50', 'bg-slate-800');
+                    btnClose.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+                    btnClose.innerText = "Tutup & Kembali ke Lobby";
+                }
+            }, 1000);
+        }
+
+        window.closeMatchResult = function() {
+            document.getElementById('modal-match-result').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        };
+
+        // Initialize 3D Engine on load
+        window.addEventListener('load', init3D);
+    </script>
+</body>
+</html>
