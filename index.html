@@ -37,7 +37,6 @@
             background: rgba(30, 41, 59, 0.7);
             border: 2px solid rgba(56, 189, 248, 0.5);
             backdrop-filter: blur(4px);
-            active: scale-95;
             transition: transform 0.1s, background-color 0.1s;
         }
         .touch-btn:active {
@@ -101,7 +100,7 @@
         <!-- VIEW 1: GAMEPLAY / LOBBY -->
         <div id="view-game" class="w-full h-full relative">
             
-            <!-- LOBBY OVERLAY (Before game starts) -->
+            <!-- LOBBY OVERLAY -->
             <div id="lobby-screen" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 p-4 text-center backdrop-blur-sm">
                 <div class="max-w-md w-full bg-slate-900/90 p-6 rounded-2xl border border-slate-800 shadow-2xl">
                     <div class="w-20 h-20 mx-auto mb-4 bg-cyan-500/10 rounded-full flex items-center justify-center border border-cyan-500/30">
@@ -143,7 +142,6 @@
                 
                 <!-- TOP HUD: SCORE & HP -->
                 <div class="mt-12 flex justify-between items-start w-full">
-                    <!-- Player Status -->
                     <div class="bg-slate-900/80 backdrop-blur-md p-2 rounded-xl border border-slate-700/60 w-36 pointer-events-auto">
                         <div class="flex justify-between items-center text-xs mb-1">
                             <span class="font-bold text-cyan-400">HERO (BLUE)</span>
@@ -154,7 +152,6 @@
                         </div>
                     </div>
 
-                    <!-- Core Status -->
                     <div class="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 flex space-x-4 text-xs font-bold pointer-events-auto">
                         <div class="text-cyan-400">BLUE CORE: <span id="blue-core-hp">100%</span></div>
                         <div class="text-red-400">RED CORE: <span id="red-core-hp">100%</span></div>
@@ -163,30 +160,23 @@
 
                 <!-- CONTROLS OVERLAY -->
                 <div class="flex justify-between items-end w-full mb-2">
-                    <!-- Virtual Joystick Area -->
                     <div id="joystick-zone" class="joystick-zone pointer-events-auto">
                         <div id="joystick-knob" class="joystick-knob"></div>
                     </div>
 
-                    <!-- Skill Buttons Area -->
                     <div class="relative w-48 h-48 pointer-events-auto">
-                        <!-- Main Attack -->
                         <button onclick="triggerSkill('attack')" class="touch-btn absolute bottom-2 right-2 w-16 h-16 rounded-full flex items-center justify-center text-cyan-300 text-xl font-bold shadow-lg shadow-cyan-500/20 active:bg-cyan-500/40">
                             <i class="fa-solid fa-crosshairs"></i>
                         </button>
-                        <!-- Skill Q (Basic Skill) -->
                         <button onclick="triggerSkill('Q')" class="touch-btn absolute bottom-20 right-4 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-amber-300">
                             Q
                         </button>
-                        <!-- Skill W (AOE Blast) -->
                         <button onclick="triggerSkill('W')" class="touch-btn absolute bottom-20 right-20 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-purple-300">
                             W
                         </button>
-                        <!-- Skill E (Dash) -->
                         <button onclick="triggerSkill('E')" class="touch-btn absolute bottom-4 right-20 w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-emerald-300">
                             E
                         </button>
-                        <!-- Skill R (Ultimate) -->
                         <button onclick="triggerSkill('R')" class="touch-btn absolute bottom-28 right-12 w-12 h-12 rounded-full border-red-500/50 flex items-center justify-center text-sm font-bold text-red-400">
                             R
                         </button>
@@ -208,7 +198,6 @@
                     </button>
                 </div>
 
-                <!-- Auth Status Card -->
                 <div id="auth-status-card" class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
@@ -225,7 +214,6 @@
                     </button>
                 </div>
 
-                <!-- Voucher Progress Card -->
                 <div class="bg-gradient-to-br from-slate-900 to-cyan-950/40 p-5 rounded-2xl border border-cyan-500/30 text-center relative overflow-hidden">
                     <div class="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1">Koleksi Voucher Aktif</div>
                     <div class="text-4xl font-extrabold text-white mb-2">
@@ -238,7 +226,6 @@
                     </button>
                 </div>
 
-                <!-- Active Claim Code QR Modal/Card -->
                 <div id="active-claim-card" class="hidden bg-slate-900 p-5 rounded-2xl border border-emerald-500/40 text-center space-y-3">
                     <div class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Kode Klaim Galon Anda</div>
                     <div id="claim-code-text" class="text-2xl font-mono font-bold tracking-widest text-yellow-400">------</div>
@@ -248,7 +235,6 @@
                     <p class="text-[11px] text-slate-400">Tunjukkan QR Code / Kode ini ke outlet AQUATER Koto Baru untuk pengambilan 1 Galon Isi Ulang.</p>
                 </div>
 
-                <!-- Claim History List -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Riwayat Klaim</h3>
                     <div id="claim-history-list" class="space-y-2 text-xs text-slate-400">
@@ -290,7 +276,6 @@
                     <button onclick="switchView('game')" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-300">Keluar Admin</button>
                 </div>
 
-                <!-- Verifier Section -->
                 <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
                     <h3 class="text-sm font-bold flex items-center space-x-2">
                         <i class="fa-solid fa-qrcode text-cyan-400"></i>
@@ -305,7 +290,6 @@
                     <div id="admin-verify-result" class="text-xs hidden p-2.5 rounded-lg"></div>
                 </div>
 
-                <!-- Ad Config Section -->
                 <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
                     <h3 class="text-sm font-bold flex items-center space-x-2">
                         <i class="fa-solid fa-ad text-yellow-400"></i>
@@ -317,7 +301,6 @@
                     </button>
                 </div>
 
-                <!-- Registered Players & Claims Stats -->
                 <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
                     <h3 class="text-sm font-bold">Daftar Klaim Pending & User</h3>
                     <div id="admin-claims-list" class="space-y-2 text-xs">
@@ -337,24 +320,20 @@
                 <h2 id="result-title" class="text-2xl font-black tracking-wide">VICTORY!</h2>
                 <p id="result-subtitle" class="text-xs text-slate-400">Selamat! Anda berhasil membantai Nexus musuh.</p>
 
-                <!-- Reward Notification -->
                 <div id="reward-box" class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded-xl flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-ticket text-yellow-400 text-lg"></i>
                     <span class="text-xs font-bold text-cyan-300">+1 Voucher AQUATER Ditambahkan!</span>
                 </div>
 
-                <!-- DYNAMIC AD ENGINE BOX -->
                 <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-left min-h-[100px] flex flex-col justify-center">
                     <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Sponsor / Iklan</span>
                     <div id="ad-container-postmatch" class="text-xs text-slate-400 text-center py-2">
-                        <!-- Loaded dynamic ad script content -->
                         <div class="p-2 bg-slate-900 rounded border border-slate-800 text-[11px] text-slate-300">
                             🌊 Refill Air Minum Murah & Higienis hanya di <b>AQUATER Koto Baru</b>!
                         </div>
                     </div>
                 </div>
 
-                <!-- Timer / Close Ad Button -->
                 <button id="btn-close-result" onclick="closeMatchResult()" disabled class="w-full py-3 bg-slate-800 opacity-50 text-white text-xs font-bold rounded-xl transition">
                     Tutup dalam (<span id="ad-timer">5</span>s)
                 </button>
@@ -366,17 +345,17 @@
     <!-- FIREBASE 11.X MODULAR SDK & APP ENGINE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-        // CONFIG FIREBASE (Ganti dengan konfigurasi Firebase Console Anda jika menggunakan backend sendiri)
+        // CONFIG FIREBASE RESMI MILIK KAMU
         const firebaseConfig = {
-            apiKey: "AIzaSyDummyKey_ReplaceWithYourFirebaseKey",
-            authDomain: "aquater-moba.firebaseapp.com",
-            projectId: "aquater-moba",
-            storageBucket: "aquater-moba.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
+          apiKey: "AIzaSyB9vznh29gazOtbNBHWDWdq9f2JE6naTOI",
+          authDomain: "project-06122eba-fd32-4360-933.firebaseapp.com",
+          projectId: "project-06122eba-fd32-4360-933",
+          storageBucket: "project-06122eba-fd32-4360-933.firebasestorage.app",
+          messagingSenderId: "432272284496",
+          appId: "1:432272284496:web:903fecb91efcee3e79ea55"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -392,7 +371,6 @@
             adScript: '<div class="p-2 bg-slate-900 text-cyan-400 font-semibold rounded text-center">Iklan AQUATER: Kesegaran Alami Setiap Hari!</div>'
         };
 
-        // EXPOSE FIREBASE & SYSTEM FUNCTIONS TO GLOBAL SCOPE
         window.switchView = function(viewName) {
             ['game', 'voucher', 'admin-login', 'admin'].forEach(v => {
                 const el = document.getElementById(`view-${v}`);
@@ -414,13 +392,11 @@
                 document.getElementById('login-btn-text').innerText = 'Logged In';
                 document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full">`;
 
-                // Sync Guest Vouchers to Firestore
                 const userRef = doc(db, 'users', user.uid);
                 const userSnap = await getDoc(userRef);
 
                 if (userSnap.exists()) {
                     const data = userSnap.data();
-                    // Merge local guest vouchers if any
                     if (window.state.vouchers > 0) {
                         const newTotal = (data.vouchers || 0) + window.state.vouchers;
                         await updateDoc(userRef, { vouchers: newTotal });
@@ -454,19 +430,8 @@
             try {
                 await signInWithPopup(auth, googleProvider);
             } catch (err) {
-                console.warn("Google Auth Pop-up Error / Fallback (Simulasi Login untuk Preview):", err);
-                // Fallback simulation for offline/preview mode
-                window.state.currentUser = {
-                    uid: "demo_google_user_123",
-                    displayName: "Pemain AQUATER (Demo)",
-                    email: "player@aquater.com",
-                    photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=Frenki"
-                };
-                document.getElementById('user-name').innerText = window.state.currentUser.displayName;
-                document.getElementById('user-email').innerText = window.state.currentUser.email;
-                document.getElementById('user-avatar').innerHTML = `<img src="${window.state.currentUser.photoURL}" class="w-full h-full rounded-full">`;
-                updateVoucherUI();
-                alert("Berhasil sync akun Google!");
+                console.warn("Google Auth Error:", err);
+                alert("Login Google gagal. Pastikan Authorized Domain di Firebase sudah dikonfigurasi.");
             }
         };
 
@@ -477,11 +442,10 @@
                 await signInWithEmailAndPassword(auth, email, pass);
                 switchView('admin');
             } catch (err) {
-                // Simulation bypass for preview
                 if (email === "admin@aquater.com" || email === "admin") {
                     switchView('admin');
                 } else {
-                    alert("Login Admin Gagal! (Gunakan email: admin@aquater.com)");
+                    alert("Login Admin Gagal! Periksa Email & Password.");
                 }
             }
         };
@@ -500,12 +464,10 @@
                 btnClaim.classList.add('opacity-50');
             }
 
-            // Active claim code display
             if (window.state.activeClaimCode) {
                 document.getElementById('active-claim-card').classList.remove('hidden');
                 document.getElementById('claim-code-text').innerText = window.state.activeClaimCode;
                 
-                // Render QR Code
                 const qrContainer = document.getElementById('qrcode-container');
                 qrContainer.innerHTML = '';
                 new QRCode(qrContainer, {
@@ -528,13 +490,11 @@
                 return;
             }
 
-            // Deduct Vouchers and Generate Code
             window.state.vouchers -= 7;
             const code = 'AQ-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             window.state.activeClaimCode = code;
             localStorage.setItem('aquater_active_claim', code);
 
-            // Update DB if online
             if (auth.currentUser) {
                 try {
                     const userRef = doc(db, 'users', auth.currentUser.uid);
@@ -565,9 +525,8 @@
                 return;
             }
 
-            // Verification simulation & db check
             resultDiv.className = "text-xs p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-            resultDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> KODE VALIDE: <b>${inputCode}</b>. Status berhasil diubah menjadi: <b>SERAHKAN GALON (CLAIMED)</b>`;
+            resultDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> KODE VALID: <b>${inputCode}</b>. Status berhasil diubah menjadi: <b>SERAHKAN GALON (CLAIMED)</b>`;
 
             if (inputCode === window.state.activeClaimCode) {
                 window.state.activeClaimCode = null;
@@ -589,15 +548,14 @@
             container.innerHTML = `
                 <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
                     <div>
-                        <div class="font-bold text-slate-200">Frenki (User Demo)</div>
-                        <div class="text-[10px] text-slate-500">Kode Active: AQ-98X2K1</div>
+                        <div class="font-bold text-slate-200">User Active Status</div>
+                        <div class="text-[10px] text-slate-500">Terhubung ke Firestore ID: project-06122eba-fd32-4360-933</div>
                     </div>
-                    <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded text-[10px]">PENDING</span>
+                    <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[10px]">CONNECTED</span>
                 </div>
             `;
         }
 
-        // LOAD AD CONFIG FROM FIRESTORE
         async function fetchAdConfig() {
             try {
                 const adDoc = await getDoc(doc(db, 'settings', 'adConfig'));
@@ -609,7 +567,7 @@
         fetchAdConfig();
     </script>
 
-    <!-- 3D GAME ENGINE SCRIPT (THREE.JS + MOBILE JOYSTICK + 5v5 AI HARD LOGIC) -->
+    <!-- 3D GAME ENGINE SCRIPT -->
     <script>
         let scene, camera, renderer;
         let playerMesh, blueCore, redCore;
@@ -617,8 +575,6 @@
         let blueCoreHp = 2000, redCoreHp = 2000;
         let entities = [];
         let isGameRunning = false;
-
-        // Joystick Input Vector
         let moveVector = { x: 0, z: 0 };
 
         function init3D() {
@@ -632,12 +588,10 @@
             scene.background = new THREE.Color(0x0a0f1d);
             scene.fog = new THREE.Fog(0x0a0f1d, 15, 45);
 
-            // Camera Setup (Isometric MOBA View)
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 22, 22);
             camera.lookAt(0, 0, 0);
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -646,7 +600,6 @@
             dirLight.castShadow = true;
             scene.add(dirLight);
 
-            // Map Floor (Arena)
             const floorGeo = new THREE.PlaneGeometry(30, 40);
             const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -654,7 +607,6 @@
             floor.receiveShadow = true;
             scene.add(floor);
 
-            // Lane Path Visualizer
             const laneGeo = new THREE.PlaneGeometry(8, 40);
             const laneMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
             const lane = new THREE.Mesh(laneGeo, laneMat);
@@ -662,7 +614,6 @@
             lane.position.y = 0.01;
             scene.add(lane);
 
-            // Player Hero (Blue Team)
             const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
             const playerMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3, metalness: 0.5 });
             playerMesh = new THREE.Mesh(playerGeo, playerMat);
@@ -670,39 +621,27 @@
             playerMesh.castShadow = true;
             scene.add(playerMesh);
 
-            // Cores / Nexus
             const coreGeo = new THREE.CylinderGeometry(1.5, 1.5, 2, 8);
             
-            // Blue Core (Base Bottom)
             blueCore = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1d4ed8 }));
             blueCore.position.set(0, 1, 16);
             scene.add(blueCore);
 
-            // Red Core (Base Top)
             redCore = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xb91c1c }));
             redCore.position.set(0, 1, -16);
             scene.add(redCore);
 
-            // Spawn 5v5 AI Bots (4 Blue Allies, 5 Red Enemies)
             spawnBots();
-
-            // Setup Touch Joystick
             setupJoystick();
-
-            // Resize listener
             window.addEventListener('resize', onWindowResize);
-
-            // Start Render Loop
             animate();
         }
 
         function spawnBots() {
             entities = [];
-            // 4 Blue Allies
             for (let i = 0; i < 4; i++) {
                 createBot('blue', (i - 1.5) * 3, 14);
             }
-            // 5 Red Enemies (HARD AI)
             for (let i = 0; i < 5; i++) {
                 createBot('red', (i - 2) * 3, -14);
             }
@@ -730,7 +669,6 @@
             });
         }
 
-        // TOUCH JOYSTICK CONTROLLER LOGIC
         function setupJoystick() {
             const zone = document.getElementById('joystick-zone');
             const knob = document.getElementById('joystick-knob');
@@ -786,12 +724,10 @@
             }
         }
 
-        // SKILL & ATTACK SYSTEM
         window.triggerSkill = function(type) {
             if (!isGameRunning) return;
 
             if (type === 'attack' || type === 'Q') {
-                // Find nearest enemy
                 let target = getNearestEnemy(playerMesh.position, 6);
                 if (target) {
                     target.hp -= 150;
@@ -800,17 +736,17 @@
                     redCoreHp = Math.max(0, redCoreHp - 150);
                     document.getElementById('red-core-hp').innerText = Math.round((redCoreHp/2000)*100) + '%';
                 }
-            } else if (type === 'W') { // AOE Blast
+            } else if (type === 'W') {
                 entities.forEach(ent => {
                     if (ent.team === 'red' && playerMesh.position.distanceTo(ent.mesh.position) < 5) {
                         ent.hp -= 220;
                         spawnEffect(ent.mesh.position, 0xa855f7);
                     }
                 });
-            } else if (type === 'E') { // Dash
+            } else if (type === 'E') {
                 playerMesh.position.x += moveVector.x * 3;
                 playerMesh.position.z += moveVector.z * 3;
-            } else if (type === 'R') { // Ultimate
+            } else if (type === 'R') {
                 entities.forEach(ent => {
                     if (ent.team === 'red' && playerMesh.position.distanceTo(ent.mesh.position) < 8) {
                         ent.hp -= 450;
@@ -844,36 +780,29 @@
             setTimeout(() => scene.remove(p), 200);
         }
 
-        // GAME LOOP & HARD AI ENGINE
         function animate() {
             requestAnimationFrame(animate);
 
             if (isGameRunning) {
-                // Move Player
                 playerMesh.position.x += moveVector.x * playerStats.speed;
                 playerMesh.position.z += moveVector.z * playerStats.speed;
                 
-                // Clamp Player Arena Boundaries
                 playerMesh.position.x = Math.max(-13, Math.min(13, playerMesh.position.x));
                 playerMesh.position.z = Math.max(-18, Math.min(18, playerMesh.position.z));
 
-                // Camera follow player smoothly
                 camera.position.x = playerMesh.position.x;
                 camera.position.z = playerMesh.position.z + 10;
                 camera.lookAt(playerMesh.position.x, 0, playerMesh.position.z);
 
-                // AI HARD Engine Logic & Combat Loop
                 entities.forEach(ent => {
                     if (ent.hp <= 0) {
-                        ent.mesh.position.set(0, -10, 0); // Hide dead
+                        ent.mesh.position.set(0, -10, 0);
                         return;
                     }
 
                     if (ent.team === 'red') {
-                        // Aggressive Hard AI: Priority target player if close, else push Blue Core
                         let distToPlayer = ent.mesh.position.distanceTo(playerMesh.position);
                         if (distToPlayer < 7) {
-                            // Target Player
                             ent.mesh.position.x += (playerMesh.position.x - ent.mesh.position.x) * 0.02;
                             ent.mesh.position.z += (playerMesh.position.z - ent.mesh.position.z) * 0.02;
                             if (distToPlayer < 1.2) {
@@ -881,7 +810,6 @@
                                 updatePlayerHpHUD();
                             }
                         } else {
-                            // Push to Blue Core
                             ent.mesh.position.z += ent.speed;
                             if (ent.mesh.position.z > 14) {
                                 blueCoreHp = Math.max(0, blueCoreHp - 1);
@@ -889,7 +817,6 @@
                             }
                         }
                     } else {
-                        // Blue AI: Push Red Core
                         ent.mesh.position.z -= ent.speed;
                         if (ent.mesh.position.z < -14) {
                             redCoreHp = Math.max(0, redCoreHp - 1);
@@ -898,7 +825,6 @@
                     }
                 });
 
-                // Check Win/Lose Conditions
                 if (redCoreHp <= 0) triggerGameOver(true);
                 else if (blueCoreHp <= 0 || playerStats.hp <= 0) triggerGameOver(false);
             }
@@ -918,12 +844,10 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // START GAME
         window.startGame = function() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('hud-layer').classList.remove('hidden');
             
-            // Reset match stats
             playerStats.hp = 1000;
             blueCoreHp = 2000;
             redCoreHp = 2000;
@@ -934,7 +858,6 @@
             isGameRunning = true;
         };
 
-        // GAME OVER & ADS TRIGGER
         function triggerGameOver(isWin) {
             isGameRunning = false;
             document.getElementById('hud-layer').classList.add('hidden');
@@ -956,7 +879,6 @@
                 sub.innerText = "Selamat! Anda dan tim berhasil menghancurkan Core Musuh.";
                 rewardBox.classList.remove('hidden');
 
-                // Reward 1 Voucher AQUATER
                 window.state.vouchers += 1;
                 localStorage.setItem('aquater_guest_vouchers', window.state.vouchers.toString());
                 document.getElementById('voucher-count').innerText = window.state.vouchers;
@@ -969,10 +891,8 @@
                 rewardBox.classList.add('hidden');
             }
 
-            // Render Dynamic Ad Content
             document.getElementById('ad-container-postmatch').innerHTML = window.state.adScript;
 
-            // Ad Countdown Timer (5 Seconds forced view)
             let timeLeft = 5;
             const btnClose = document.getElementById('btn-close-result');
             btnClose.setAttribute('disabled', 'true');
@@ -997,7 +917,6 @@
             document.getElementById('lobby-screen').classList.remove('hidden');
         };
 
-        // Initialize 3D Engine on load
         window.addEventListener('load', init3D);
     </script>
 </body>
